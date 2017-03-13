@@ -1,1 +1,1 @@
-web: todong/cmd/todong
+web: todong
