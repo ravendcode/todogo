@@ -19,6 +19,7 @@ func main() {
 	// n.Use(negroni.HandlerFunc(middlewares.ContextDbMiddleware))
 	// n.Use(negroni.HandlerFunc(middlewares.ContextViewMiddleware))
 	// n.UseHandler(router)
+
 	http.Handle("/", http.FileServer(http.Dir("public")))
 	http.Handle("/node_modules/", http.StripPrefix("/node_modules/", http.FileServer(http.Dir("node_modules"))))
 
