@@ -6,7 +6,9 @@
 3. Heroku
 
 ### Usage
-1. `npm i`
-2. `npm i gulp-cli -g`
-3. `gulp` start auto compilation golang app
+1. Edit config.go
+2. `go get`
+3. `npm i`
+4. `npm i gulp-cli -g`
+5. `gulp` start auto compilation golang app
 
