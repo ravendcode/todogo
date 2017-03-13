@@ -1,1 +1,1 @@
-web: github.com/ravendcode/todong/cmd/todong
+web: todong/cmd/todong
