@@ -48,75 +48,63 @@ type TodoResponse struct {
 	Todo *Todo `json:"todo"`
 }
 
-var todoList = Todos{
-	{ID: 1, Title: "Create chat", IsComplete: false, CreatedAt: time.Now().Add(-24 * time.Hour)},
-	{ID: 2, Title: "Drink tea", IsComplete: true, CreatedAt: time.Now().Add(-2 * time.Hour)},
-	{ID: 3, Title: "Search job", IsComplete: false, CreatedAt: time.Now()},
+// TodoHandler struct
+type TodoHandler struct {
 }
 
-func todoListHandler(w http.ResponseWriter, r *http.Request) {
+func (t TodoHandler) list(w http.ResponseWriter, r *http.Request) {
 	render := RenderCtx(r.Context())
 	render.JSON(w, TodosResponse{&todoList})
 }
 
-func todoCreateHandler(w http.ResponseWriter, r *http.Request) {
+func (t TodoHandler) create(w http.ResponseWriter, r *http.Request) {
 	var todo Todo
 	json.NewDecoder(r.Body).Decode(&todo)
 	if err := todo.Validate(); err != nil {
 		render.Status(http.StatusBadRequest).JSON(w, NewErrorValidate(err))
 		return
 	}
-	todo.ID = len(todoList) + 1
-	todo.CreatedAt = time.Now()
-	todoList = append(todoList, todo)
+	todoCreateRepo(&todo)
 
 	render.Status(http.StatusCreated).JSON(w, TodoResponse{&todo})
 }
 
-func todoGetHandler(w http.ResponseWriter, r *http.Request) {
+func (t TodoHandler) find(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-	for _, todo := range todoList {
-		if todo.ID == id {
-			render.JSON(w, TodoResponse{&todo})
-			return
-		}
+	index, todo := todoFindRepo(id)
+	if index == -1 {
+		render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
+		return
 	}
-	render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
+	render.JSON(w, TodoResponse{&todo})
 }
 
-func todoUpdateHandler(w http.ResponseWriter, r *http.Request) {
+func (t TodoHandler) update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
-	for index, todo := range todoList {
-		if todo.ID == id {
-			json.NewDecoder(r.Body).Decode(&todo)
-			if err := todo.Validate(); err != nil {
-				render.Status(http.StatusBadRequest).JSON(w, NewErrorValidate(err))
-				return
-			}
-
-			todoList[index] = todo
-
-			render.JSON(w, TodoResponse{&todo})
-			return
-		}
+	index, todo := todoFindRepo(id)
+	if index == -1 {
+		render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
+		return
 	}
+	json.NewDecoder(r.Body).Decode(&todo)
+	if err := todo.Validate(); err != nil {
+		render.Status(http.StatusBadRequest).JSON(w, NewErrorValidate(err))
+		return
+	}
+	todoList[index] = todo
+	render.JSON(w, TodoResponse{&todo})
 }
 
-func todoDeleteHandler(w http.ResponseWriter, r *http.Request) {
+func (t TodoHandler) destroy(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
-	for index, todo := range todoList {
-		if todo.ID == id {
-			todoList = append(todoList[:index], todoList[index+1:]...)
-			render.SendStatus(w, http.StatusOK)
-			return
-		}
+	index, _ := todoFindRepo(id)
+	if index == -1 {
+		render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
+		return
 	}
-	render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
+	todoDestroyRepo(index)
+	render.SendStatus(w, http.StatusOK)
 }
