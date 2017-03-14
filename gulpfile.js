@@ -78,7 +78,7 @@ gulp.task('server:spawn', () => {
 })
 
 // Watch files
-gulp.task('server:watch', ['server:build', 'server:spawn'], () => {
+gulp.task('server:watch', () => {
   gulp.watch([
     '*.go',
     '**/*.go',
@@ -93,4 +93,4 @@ gulp.task('html', () => {
   gulp.src(publicDir + '/**/*.html')
 })
 
-gulp.task('default', ['server:watch'])
+gulp.task('default', ['server:build', 'server:spawn', 'server:watch'])
