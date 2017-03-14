@@ -7,14 +7,14 @@ import (
 
 // Render struct
 type Render struct {
-	Layout string
-	Status int
+	layout string
+	status int
 }
 
-// func (v *Render) HTML(w io.Writer, name string, data interface{}) error {
+// func (r *Render) HTML(w io.Writer, name string, data interface{}) error {
 // 	output, err := template.ParseFiles(
 // 		fmt.Sprintf("templates/%s.html", name),
-// 		fmt.Sprintf("templates/layouts/%s.html", v.Layout),
+// 		fmt.Sprintf("templates/layouts/%s.html", r.layout),
 // 		fmt.Sprintf("templates/partials/_nav.html"),
 // 		fmt.Sprintf("templates/partials/_user.html"),
 // 	)
@@ -25,28 +25,28 @@ type Render struct {
 // 	return templates.ExecuteTemplate(w, "base", data)
 // }
 
-// SetLayout method
-func (v *Render) SetLayout(name string) *Render {
-	v.Layout = name
-	return v
+// Layout method
+func (r *Render) Layout(name string) *Render {
+	r.layout = name
+	return r
 }
 
-// SetStatus method
-func (v *Render) SetStatus(status int) *Render {
-	v.Status = status
-	return v
+// Status method
+func (r *Render) Status(status int) *Render {
+	r.status = status
+	return r
 }
 
 // SendStatus method
-func (v *Render) SendStatus(w http.ResponseWriter, status int) {
-	w.WriteHeader(v.Status)
+func (r *Render) SendStatus(w http.ResponseWriter, status int) {
+	w.WriteHeader(r.status)
 }
 
 // JSON method
-func (v *Render) JSON(w http.ResponseWriter, data interface{}) {
+func (r *Render) JSON(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(v.Status)
-	v.Status = http.StatusOK
+	w.WriteHeader(r.status)
+	r.status = http.StatusOK
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -54,5 +54,7 @@ func (v *Render) JSON(w http.ResponseWriter, data interface{}) {
 
 // NewRender create new Render instance
 func NewRender() *Render {
-	return &Render{Layout: "base", Status: http.StatusOK}
+	return &Render{layout: "base", status: http.StatusOK}
 }
+
+var render = NewRender()

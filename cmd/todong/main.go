@@ -28,10 +28,12 @@ func main() {
 	// n := negroni.New()
 	// n.Use(negroni.HandlerFunc(middlewares.ContextDbMiddleware))
 	// n.Use(negroni.HandlerFunc(middlewares.ContextViewMiddleware))
+	n.Use(negroni.HandlerFunc(todong.RenderMdw))
+
 	n.UseHandler(r)
 
-	r.Handle("/node_modules/", http.StripPrefix("/node_modules/", http.FileServer(http.Dir("node_modules"))))
-	r.Handle("/", http.FileServer(http.Dir("public")))
+	http.Handle("/node_modules/", http.StripPrefix("/node_modules/", http.FileServer(http.Dir("node_modules"))))
+	http.Handle("/", http.FileServer(http.Dir("public")))
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "public/assets/icons/favicon.ico")
 	})

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-ozzo/ozzo-validation"
 	"github.com/gorilla/mux"
 )
 
@@ -15,6 +16,23 @@ type Todo struct {
 	Title      string    `json:"title"`
 	IsComplete bool      `json:"isComplete"`
 	CreatedAt  time.Time `json:"createdAt"`
+}
+
+// Validate method
+func (t Todo) Validate() error {
+	return validation.ValidateStruct(&t,
+		validation.Field(
+			&t.Title,
+			// validation.Required.Error("не может быть пустым"),
+			validation.Required,
+			validation.Length(2, 50),
+		),
+		validation.Field(
+			&t.IsComplete,
+			// validation.Required.Error("не может быть пустым"),
+			// validation.Required,
+		),
+	)
 }
 
 // Todos type
@@ -36,23 +54,23 @@ var todoList = Todos{
 	{ID: 3, Title: "Search job", IsComplete: false, CreatedAt: time.Now()},
 }
 
-var render = NewRender()
-
 func todoListHandler(w http.ResponseWriter, r *http.Request) {
+	render := RenderCtx(r.Context())
 	render.JSON(w, TodosResponse{&todoList})
 }
 
 func todoCreateHandler(w http.ResponseWriter, r *http.Request) {
 	var todo Todo
-	if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
-		render.SetStatus(http.StatusBadRequest).JSON(w, NewError(err.Error()))
+	json.NewDecoder(r.Body).Decode(&todo)
+	if err := todo.Validate(); err != nil {
+		render.Status(http.StatusBadRequest).JSON(w, NewErrorValidate(err))
 		return
 	}
 	todo.ID = len(todoList) + 1
 	todo.CreatedAt = time.Now()
 	todoList = append(todoList, todo)
 
-	render.SetStatus(http.StatusCreated).JSON(w, TodoResponse{&todo})
+	render.Status(http.StatusCreated).JSON(w, TodoResponse{&todo})
 }
 
 func todoGetHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +86,7 @@ func todoGetHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	render.SetStatus(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
+	render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
 }
 
 func todoUpdateHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,8 +94,9 @@ func todoUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(vars["id"])
 	for index, todo := range todoList {
 		if todo.ID == id {
-			if err := json.NewDecoder(r.Body).Decode(&todo); err != nil {
-				render.SetStatus(http.StatusBadRequest).JSON(w, NewError(err.Error()))
+			json.NewDecoder(r.Body).Decode(&todo)
+			if err := todo.Validate(); err != nil {
+				render.Status(http.StatusBadRequest).JSON(w, NewErrorValidate(err))
 				return
 			}
 
@@ -99,5 +118,5 @@ func todoDeleteHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	render.SetStatus(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
+	render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
 }

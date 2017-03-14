@@ -7,7 +7,7 @@ import (
 // APIRouter func
 func APIRouter(router *mux.Router) {
 
-	r := router.StrictSlash(true).PathPrefix("/api").Subrouter()
+	r := router.StrictSlash(false).PathPrefix("/api").Subrouter()
 
 	r.HandleFunc("/todos", todoListHandler).Methods("GET")
 	r.HandleFunc("/todos", todoCreateHandler).Methods("POST")
