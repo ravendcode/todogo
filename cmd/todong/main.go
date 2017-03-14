@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html"
 	"log"
 	"net/http"
 	"time"
@@ -15,29 +14,43 @@ import (
 func main() {
 	config := todong.GetConfig()
 
-	// r := todong.Router()
 	r := mux.NewRouter()
-	todong.APIRouter(r)
-	http.Handle("/api/", r)
 
-	r.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// http.ServeFile(w, r, "public/index.html")
+		todong.RenderCtx(r.Context()).HTML(w, "index", nil)
 	})
+	// r.HandleFunc("/500", func(w http.ResponseWriter, r *http.Request) {
+	// 	http.Error(w, "500 error", http.StatusInternalServerError)
+	// })
+	r.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// http.ServeFile(w, r, "public/404.html")
+		todong.RenderCtx(r.Context()).HTML(w, "404", nil)
+		// todong.RenderCtx(r.Context()).HTML(w, "index", nil)
+	})
+	r.PathPrefix("/node_modules/").Handler(http.StripPrefix("/node_modules/", http.FileServer(http.Dir("node_modules"))))
+
+	// r.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+	// 	http.ServeFile(w, r, "public/assets/icons/favicon.ico")
+	// })
+
+	todong.APIRouter(r)
 
 	n := negroni.Classic()
 	// n := negroni.New()
-	// n.Use(negroni.HandlerFunc(middlewares.ContextDbMiddleware))
-	// n.Use(negroni.HandlerFunc(middlewares.ContextViewMiddleware))
+	// n.Use(negroni.NewLogger())
+
 	n.Use(negroni.HandlerFunc(todong.RenderMdw))
 
 	n.UseHandler(r)
 
-	http.Handle("/node_modules/", http.StripPrefix("/node_modules/", http.FileServer(http.Dir("node_modules"))))
-	http.Handle("/", http.FileServer(http.Dir("public")))
-	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "public/assets/icons/favicon.ico")
-	})
 	// http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
+	// http.Handle("/public/node_modules/", http.StripPrefix("/public/node_modules/", http.FileServer(http.Dir("node_modules"))))
+	// http.Handle("/public/js/", http.StripPrefix("/public/js/", http.FileServer(http.Dir("public/js"))))
+	// http.Handle("/", http.FileServer(http.Dir("public")))
+	// http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+	// 	http.ServeFile(w, r, "public/assets/icons/favicon.ico")
+	// })
 
 	fmt.Printf("Server listening on localhost:%s\n", config.Port)
 

@@ -2,7 +2,7 @@ const path = require('path')
 const gulp = require('gulp')
 const util = require('gulp-util')
 const notifier = require('node-notifier')
-const sync = require('gulp-sync')(gulp).sync
+// const sync = require('gulp-sync')(gulp).sync
 const child = require('child_process')
 const os = require('os')
 
@@ -79,13 +79,8 @@ gulp.task('server:spawn', () => {
 
 // Watch files
 gulp.task('server:watch', ['server:build', 'server:spawn'], () => {
-  gulp.watch([
-    '*.go',
-    '**/*.go',
-  ], sync([
-    'server:build',
-    'server:spawn'
-  ]))
+  // gulp.watch(['*.go', '**/*.go', '**/*.html'], sync(['server:build', 'server:spawn']))
+  gulp.watch(['*.go', '**/*.go', '**/*.html'], ['server:build', 'server:spawn'])
   // gulp.watch(publicDir + '/**/*.html', ['html'])
 })
 

@@ -53,7 +53,7 @@ type TodoHandler struct {
 }
 
 func (t TodoHandler) list(w http.ResponseWriter, r *http.Request) {
-	render := RenderCtx(r.Context())
+	// render := RenderCtx(r.Context())
 	render.JSON(w, TodosResponse{&todoList})
 }
 

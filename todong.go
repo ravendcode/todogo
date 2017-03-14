@@ -9,7 +9,7 @@ func APIRouter(router *mux.Router) {
 
 	r := router.StrictSlash(false).PathPrefix("/api").Subrouter()
 
-	todoHandler := TodoHandler{}
+	todoHandler := &TodoHandler{}
 	r.HandleFunc("/todos", todoHandler.list).Methods("GET")
 	r.HandleFunc("/todos", todoHandler.create).Methods("POST")
 	r.HandleFunc("/todos/{id:[0-9]+}", todoHandler.find).Methods("GET")
