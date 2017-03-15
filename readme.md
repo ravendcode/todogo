@@ -10,5 +10,5 @@
 2. `go get`
 3. `npm i`
 4. `npm i gulp-cli -g`
-5. `gulp` start auto compilation golang app
+5. `gulp` or `fresh`(https://github.com/pilu/fresh)
 

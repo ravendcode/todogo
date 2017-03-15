@@ -20,14 +20,14 @@ if (platform === 'win32') {
 // Application name
 const app = pathFolder[pathFolder.length - 1]
 
-const mainPackageDir = './cmd/' + app
+// const mainPackageDir = './cmd/' + app
 const publicDir = 'public'
 
 // Compile application
 gulp.task('server:build', () => {
   // Build application in the "gobin" folder
-  let build = child.spawnSync('go', ['install', mainPackageDir])
-  // let build = child.spawnSync('go', ['build', mainPackageDir])
+  let build = child.spawnSync('go', ['install'])
+  // let build = child.spawnSync('go', ['install', mainPackageDir])
   isServerBuildError = false
   if (build.stderr.length) {
     util.log(util.colors.red('Something wrong with this version :'))

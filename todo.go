@@ -1,4 +1,4 @@
-package todong
+package main
 
 import (
 	"encoding/json"
@@ -12,10 +12,11 @@ import (
 
 // Todo model
 type Todo struct {
-	ID         int       `json:"id"`
-	Title      string    `json:"title"`
-	IsComplete bool      `json:"isComplete"`
+	ID         int64     `json:"id"`
+	Title      string    `json:"title" gorm:"type:varchar(100);not null"`
+	IsComplete bool      `json:"isComplete" gorm:"default:'false'"`
 	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
 // Validate method
@@ -25,7 +26,7 @@ func (t Todo) Validate() error {
 			&t.Title,
 			// validation.Required.Error("не может быть пустым"),
 			validation.Required,
-			validation.Length(2, 50),
+			validation.Length(2, 90),
 		),
 		validation.Field(
 			&t.IsComplete,
@@ -52,39 +53,48 @@ type TodoResponse struct {
 type TodoHandler struct {
 }
 
-func (t TodoHandler) list(w http.ResponseWriter, r *http.Request) {
+var todoRepo = new(TodoRepo)
+
+// List method
+func (t TodoHandler) List(w http.ResponseWriter, r *http.Request) {
 	// render := RenderCtx(r.Context())
-	render.JSON(w, TodosResponse{&todoList})
+	// db := DbCtx(r.Context())
+	render.JSON(w, TodosResponse{todoRepo.List()})
 }
 
-func (t TodoHandler) create(w http.ResponseWriter, r *http.Request) {
+// Create method
+func (t TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var todo Todo
 	json.NewDecoder(r.Body).Decode(&todo)
 	if err := todo.Validate(); err != nil {
 		render.Status(http.StatusBadRequest).JSON(w, NewErrorValidate(err))
 		return
 	}
-	todoCreateRepo(&todo)
+	todoRepo.Create(&todo)
 
 	render.Status(http.StatusCreated).JSON(w, TodoResponse{&todo})
 }
 
-func (t TodoHandler) find(w http.ResponseWriter, r *http.Request) {
+// Find method
+func (t TodoHandler) Find(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
-	index, todo := todoFindRepo(id)
-	if index == -1 {
+	todo := new(Todo)
+	todoRepo.Find(todo, id)
+	if todo.ID == 0 {
 		render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
 		return
 	}
-	render.JSON(w, TodoResponse{&todo})
+	render.JSON(w, TodoResponse{todo})
 }
 
-func (t TodoHandler) update(w http.ResponseWriter, r *http.Request) {
+// Update method
+func (t TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
-	index, todo := todoFindRepo(id)
-	if index == -1 {
+	todo := new(Todo)
+	todoRepo.Find(todo, id)
+	if todo.ID == 0 {
 		render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
 		return
 	}
@@ -93,18 +103,20 @@ func (t TodoHandler) update(w http.ResponseWriter, r *http.Request) {
 		render.Status(http.StatusBadRequest).JSON(w, NewErrorValidate(err))
 		return
 	}
-	todoList[index] = todo
-	render.JSON(w, TodoResponse{&todo})
+	todoRepo.Save(todo)
+	render.JSON(w, TodoResponse{todo})
 }
 
-func (t TodoHandler) destroy(w http.ResponseWriter, r *http.Request) {
+// Destroy method
+func (t TodoHandler) Destroy(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
-	index, _ := todoFindRepo(id)
-	if index == -1 {
+	todo := new(Todo)
+	todoRepo.Find(todo, id)
+	if todo.ID == 0 {
 		render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
 		return
 	}
-	todoDestroyRepo(index)
+	todoRepo.Destroy(todo)
 	render.SendStatus(w, http.StatusOK)
 }

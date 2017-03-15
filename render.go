@@ -1,4 +1,4 @@
-package todong
+package main
 
 import (
 	"encoding/json"

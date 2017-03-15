@@ -1,4 +1,4 @@
-package todong
+package main
 
 import (
 	"os"
@@ -6,19 +6,19 @@ import (
 
 // Config App
 type Config struct {
-	Port string
+	ENV    string
+	Port   string
+	DbPath string
 }
 
-var config *Config
-
-func init() {
-	config = &Config{Port: "80"}
+// NewConfig func
+func NewConfig() *Config {
+	config := &Config{ENV: os.Getenv("ENV"), Port: "80", DbPath: "storage/data.db"}
 	if os.Getenv("PORT") != "" {
 		config.Port = os.Getenv("PORT")
 	}
-}
-
-// GetConfig get Config instance
-func GetConfig() *Config {
+	if os.Getenv("ENV") != "development" {
+		config.ENV = "production"
+	}
 	return config
 }

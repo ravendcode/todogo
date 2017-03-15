@@ -1,4 +1,4 @@
-package todong
+package main
 
 // Err struct
 type Err struct {
