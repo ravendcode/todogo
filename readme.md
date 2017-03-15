@@ -11,4 +11,3 @@
 3. `npm i`
 4. `npm i gulp-cli -g`
 5. `gulp` or `fresh`(https://github.com/pilu/fresh)
-
