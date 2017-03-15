@@ -85,7 +85,7 @@ func (t TodoHandler) Find(w http.ResponseWriter, r *http.Request) {
 	todo := new(Todo)
 	todoRepo.Find(todo, id)
 	if todo.ID == 0 {
-		render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
+		render.Status(http.StatusNotFound).JSON(w, NewError(LocaleCtx(r.Context()).T("error.todo_not_found")))
 		return
 	}
 	render.JSON(w, TodoResponse{todo})
@@ -98,7 +98,7 @@ func (t TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
 	todo := new(Todo)
 	todoRepo.Find(todo, id)
 	if todo.ID == 0 {
-		render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
+		render.Status(http.StatusNotFound).JSON(w, NewError(LocaleCtx(r.Context()).T("error.todo_not_found")))
 		return
 	}
 	json.NewDecoder(r.Body).Decode(&todo)
@@ -117,7 +117,7 @@ func (t TodoHandler) Destroy(w http.ResponseWriter, r *http.Request) {
 	todo := new(Todo)
 	todoRepo.Find(todo, id)
 	if todo.ID == 0 {
-		render.Status(http.StatusNotFound).JSON(w, NewError("Todo Not Found"))
+		render.Status(http.StatusNotFound).JSON(w, NewError(LocaleCtx(r.Context()).T("error.todo_not_found")))
 		return
 	}
 	todoRepo.Destroy(todo)

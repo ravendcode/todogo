@@ -1,3 +1,10 @@
+# error
+- id: error.not_found
+  translation: "Not Found"
+
+- id: error.todo_not_found
+  translation: "Todo Not Found"
+
 # validate
 - id: validate.required
   translation: "The {{.Field}} field is required."

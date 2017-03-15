@@ -1,3 +1,10 @@
+# error
+- id: error.not_found
+  translation: "Не Найдено"
+
+- id: error.todo_not_found
+  translation: "Делать Не Найдено"
+
 # validate
 - id: validate.required
   translation: "Поле {{.Field}} обязательно для заполнения."
