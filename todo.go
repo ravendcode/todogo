@@ -20,13 +20,15 @@ type Todo struct {
 }
 
 // Validate method
-func (t Todo) Validate() error {
+func (t Todo) Validate(locale *Locale) error {
 	return validation.ValidateStruct(&t,
 		validation.Field(
 			&t.Title,
-			// validation.Required.Error("не может быть пустым"),
-			validation.Required,
-			validation.Length(2, 90),
+			validation.Required.Error(ValidateTrans(locale, "validate.required", "model.title")),
+			// validation.Required.Error(locale.T("validation.required", map[string]interface{}{"Field": locale.T("model.title")})),
+			// validation.Required,
+			validation.Length(2, 90).Error(ValidateMinMaxTrans(locale, "validate.length", "model.title", 2, 90)),
+			// validation.Length(2, 90),
 		),
 		validation.Field(
 			&t.IsComplete,
@@ -59,20 +61,21 @@ var todoRepo = new(TodoRepo)
 func (t TodoHandler) List(w http.ResponseWriter, r *http.Request) {
 	// render := RenderCtx(r.Context())
 	// db := DbCtx(r.Context())
+
 	render.JSON(w, TodosResponse{todoRepo.List()})
 }
 
 // Create method
 func (t TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var todo Todo
-	json.NewDecoder(r.Body).Decode(&todo)
-	if err := todo.Validate(); err != nil {
+	todo := new(Todo)
+	json.NewDecoder(r.Body).Decode(todo)
+	if err := todo.Validate(LocaleCtx(r.Context())); err != nil {
 		render.Status(http.StatusBadRequest).JSON(w, NewErrorValidate(err))
 		return
 	}
-	todoRepo.Create(&todo)
+	todoRepo.Create(todo)
 
-	render.Status(http.StatusCreated).JSON(w, TodoResponse{&todo})
+	render.Status(http.StatusCreated).JSON(w, TodoResponse{todo})
 }
 
 // Find method
@@ -99,7 +102,7 @@ func (t TodoHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewDecoder(r.Body).Decode(&todo)
-	if err := todo.Validate(); err != nil {
+	if err := todo.Validate(LocaleCtx(r.Context())); err != nil {
 		render.Status(http.StatusBadRequest).JSON(w, NewErrorValidate(err))
 		return
 	}

@@ -21,16 +21,14 @@ func APIRoutes(router *mux.Router) {
 // IndexRoutes func
 func IndexRoutes(router *mux.Router) {
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "public/index.html")
+		http.ServeFile(w, r, "public/assets/index.html")
 	})
 
-	router.PathPrefix("/node_modules/").Handler(http.StripPrefix("/node_modules/", http.FileServer(http.Dir("node_modules"))))
+	router.PathPrefix("/node_modules/").Handler(
+		http.StripPrefix("/node_modules/", http.FileServer(http.Dir("node_modules"))))
 
 	router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "public/404.html")
+		// http.ServeFile(w, r, "public/404.html")
+		http.ServeFile(w, r, "public/assets/index.html")
 	})
-
-	// router.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-	// 	http.ServeFile(w, r, "public/assets/icons/favicon.ico")
-	// })
 }

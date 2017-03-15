@@ -4,6 +4,7 @@
 1. API
 2. Angular
 3. Heroku
+4. I18n
 
 ### Usage
 1. Edit config.go

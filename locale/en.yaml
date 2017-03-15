@@ -1,0 +1,22 @@
+# validate
+- id: validate.required
+  translation: "The {{.Field}} field is required."
+
+- id: validate.min
+  translation: "The {{.Field}} must be at least {{.Count}}."
+
+- id: validate.max
+  translation: "The {{.Field}} may not be greater than {{.Count}}."
+
+- id: validate.length
+  translation: "The length of the {{.Field}} must be between {{.Min}} and {{.Max}}."
+
+# model
+- id: model.title
+  translation: "title"
+
+- id: model.isComplete
+  translation: "complete"
+
+- id: model.number
+  translation: "number"

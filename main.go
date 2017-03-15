@@ -16,11 +16,8 @@ var config = NewConfig()
 
 var db *gorm.DB
 
-func init() {
-}
-
 func main() {
-	fmt.Println("ENV is", config.ENV)
+	fmt.Println("Env is", config.Env)
 
 	var err error
 	db, err = gorm.Open("sqlite3", config.DbPath)
@@ -28,7 +25,7 @@ func main() {
 		panic(err.Error())
 	}
 	defer db.Close()
-	db.LogMode(config.ENV == "development")
+	db.LogMode(config.Env == "development")
 	MigrateDb(db)
 
 	r := mux.NewRouter()
@@ -37,7 +34,11 @@ func main() {
 	APIRoutes(r)
 
 	n := negroni.Classic()
-
+	// n := negroni.New()
+	// n.Use(negroni.NewStatic(http.Dir("public")))
+	// n.Use(negroni.NewLogger())
+	// n.Use(negroni.NewRecovery())
+	n.Use(negroni.HandlerFunc(LocaleMdw))
 	n.Use(negroni.HandlerFunc(RenderMdw))
 	n.Use(negroni.HandlerFunc(DbMdw(db)))
 
