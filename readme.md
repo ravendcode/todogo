@@ -1,10 +1,9 @@
-# TodoNg
+# TodoGo
 
 ### Features
 1. API
-2. Angular
+2. I18n
 3. Heroku
-4. I18n
 
 ### Usage
 1. Edit config.go
